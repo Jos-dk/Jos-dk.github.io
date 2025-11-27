@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Cita con Maestros</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --success-color: #2ecc71;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .form-section {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .appointments-section {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-color);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        select, input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        select:focus, input:focus, textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s;
+            width: 100%;
+        }
+        
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .teacher-card {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .teacher-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .teacher-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--light-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-right: 15px;
+            font-size: 24px;
+        }
+        
+        .teacher-info h3 {
+            margin-bottom: 5px;
+        }
+        
+        .teacher-info p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .appointment-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .appointment-item {
+            padding: 15px;
+            border-left: 4px solid var(--primary-color);
+            background-color: #f9f9f9;
+            margin-bottom: 15px;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .appointment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .appointment-teacher {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .appointment-date {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .appointment-reason {
+            color: #555;
+        }
+        
+        .empty-appointments {
+            text-align: center;
+            padding: 30px;
+            color: #777;
+        }
+        
+        .success-message {
+            background-color: var(--success-color);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Sistema de Citas Escolares</h1>
+            <p>Agenda una cita con los maestros de nuestra institución</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="success-message" id="successMessage">
+            ¡Cita agendada exitosamente!
+        </div>
+        
+        <div class="main-content">
+            <section class="form-section">
+                <h2>Agendar Nueva Cita</h2>
+                <form id="appointmentForm">
+                    <div class="form-group">
+                        <label for="teacher">Selecciona un maestro:</label>
+                        <select id="teacher" required>
+                            <option value="">-- Selecciona un maestro --</option>
+                            <option value="1">María González - Matemáticas</option>
+                            <option value="2">Carlos Rodríguez - Ciencias</option>
+                            <option value="3">Laura Martínez - Lenguaje</option>
+                            <option value="4">Javier López - Historia</option>
+                            <option value="5">Ana Sánchez - Inglés</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="date">Fecha de la cita:</label>
+                        <input type="date" id="date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="time">Hora de la cita:</label>
+                        <input type="time" id="time" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reason">Motivo de la cita:</label>
+                        <textarea id="reason" rows="4" placeholder="Describe brevemente el motivo de tu cita..." required></textarea>
+                    </div>
+                    <div class="button-card">
+                    <h3 class="button-title">Agendar cita</h3>
+                    <p>Muestra un mensaje emergente</p>
+                    <button onclick="mostrarAlerta()">Agendar cita </button>
+                </div>
+                    <button type="submit">Revisar Cita</button>
+                </form>
+            </section>
+            
+            <section class="appointments-section">
+                <h2>Tus Citas Agendadas</h2>
+                <div class="appointment-list" id="appointmentList">
+                    <div class="empty-appointments" id="emptyAppointments">
+                        <p>No tienes citas agendadas</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+        <section class="teachers-section">
+            <h2>Nuestros Maestros</h2>
+            <div class="teacher-card">
+                <div class="teacher-avatar">MG</div>
+                <div class="teacher-info">
+                    <h3>María González</h3>
+                    <p>Maestra de Matemáticas - Especialista en álgebra y cálculo</p>
+                </div>
+            </div>
+            
+            <div class="teacher-card">
+                <div class="teacher-avatar">CR</div>
+                <div class="teacher-info">
+                    <h3>Carlos Rodríguez</h3>
+                    <p>Maestro de Ciencias - Biología, Química y Física</p>
+                </div>
+            </div>
+            
+            <div class="teacher-card">
+                <div class="teacher-avatar">LM</div>
+                <div class="teacher-info">
+                    <h3>Laura Martínez</h3>
+                    <p>Maestra de Lenguaje - Literatura y redacción</p>
+                </div>
+            </div>
+            
+            <div class="teacher-card">
+                <div class="teacher-avatar">JL</div>
+                <div class="teacher-info">
+                    <h3>Javier López</h3>
+                    <p>Maestro de Historia - Historia universal y nacional</p>
+                </div>
+            </div>
+            
+            <div class="teacher-card">
+                <div class="teacher-avatar">AS</div>
+                <div class="teacher-info">
+                    <h3>Ana Sánchez</h3>
+                    <p>Maestra de Inglés - Conversación y gramática</p>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>Escuela Genérica - Sistema de Citas con Maestros</p>
+            <p>© 2023 Todos los derechos reservados</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const appointmentForm = document.getElementById('appointmentForm');
+            const appointmentList = document.getElementById('appointmentList');
+            const emptyAppointments = document.getElementById('emptyAppointments');
+            const successMessage = document.getElementById('successMessage');
+            
+            // Cargar citas existentes del localStorage
+            loadAppointments();
+            
+            // Manejar el envío del formulario
+            appointmentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Obtener valores del formulario
+                const teacherSelect = document.getElementById('teacher');
+                const teacherText = teacherSelect.options[teacherSelect.selectedIndex].text;
+                const date = document.getElementById('date').value;
+                const time = document.getElementById('time').value;
+                const reason = document.getElementById('reason').value;
+                
+                // Crear objeto de cita
+                const appointment = {
+                    id: Date.now(),
+                    teacher: teacherText,
+                    date: formatDate(date),
+                    time: time,
+                    reason: reason
+                };
+                
+                // Guardar en localStorage
+                saveAppointment(appointment);
+                
+                // Mostrar mensaje de éxito
+                showSuccessMessage();
+                
+                // Recargar la lista de citas
+                loadAppointments();
+                
+                // Resetear formulario
+                appointmentForm.reset();
+            });
+            
+            // Función para formatear la fecha
+            function formatDate(dateString) {
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                const date = new Date(dateString);
+                return date.toLocaleDateString('es-ES', options);
+            }
+            
+            // Función para guardar cita en localStorage
+            function saveAppointment(appointment) {
+                let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+                appointments.push(appointment);
+                localStorage.setItem('appointments', JSON.stringify(appointments));
+            }
+            
+            // Función para cargar citas desde localStorage
+            function loadAppointments() {
+                const appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+                
+                if (appointments.length === 0) {
+                    emptyAppointments.style.display = 'block';
+                    return;
+                }
+                
+                emptyAppointments.style.display = 'none';
+                
+                // Limpiar lista actual
+                appointmentList.innerHTML = '';
+                
+                // Agregar cada cita a la lista
+                appointments.forEach(appointment => {
+                    const appointmentItem = document.createElement('div');
+                    appointmentItem.className = 'appointment-item';
+                    appointmentItem.innerHTML = `
+                        <div class="appointment-header">
+                            <span class="appointment-teacher">${appointment.teacher}</span>
+                            <span class="appointment-date">${appointment.date} - ${appointment.time}</span>
+                        </div>
+                        <div class="appointment-reason">${appointment.reason}</div>
+                        <button class="cancel-btn" data-id="${appointment.id}" style="margin-top:10px; background-color:var(--accent-color); width:auto; padding:5px 10px;">Cancelar Cita</button>
+                    `;
+                    appointmentList.appendChild(appointmentItem);
+                });
+                
+                // Agregar event listeners a los botones de cancelar
+                document.querySelectorAll('.cancel-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        cancelAppointment(id);
+                    });
+                });
+            }
+            
+            // Función para cancelar una cita
+            function cancelAppointment(id) {
+                let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+                appointments = appointments.filter(appointment => appointment.id !== id);
+                localStorage.setItem('appointments', JSON.stringify(appointments));
+                loadAppointments();
+            }
+            
+            // Función para mostrar mensaje de éxito
+            function showSuccessMessage() {
+                successMessage.style.display = 'block';
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 3000);
+            }
+            
+            // Establecer fecha mínima como hoy
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').setAttribute('min', today);
+        });
+    </script>
+</body>
+</html>
